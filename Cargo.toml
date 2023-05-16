@@ -2,3 +2,14 @@
 name = "acmed-hook-rfc2136"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+anyhow = "1.0.71"
+base64 = "0.21.0"
+clap = { version = "4.2.7", features = ["derive"] }
+serde = { version = "1.0.163", features = ["derive"] }
+serde_with = { version = "3.0.0", features = ["base64"] }
+time = "0.3.21"
+toml = "0.7.3"
+trust-dns-client = { version = "0.22.0", features = ["dnssec", "dnssec-openssl"] }
+trust-dns-proto = { version = "0.22.0", features = ["dnssec-openssl"] }
