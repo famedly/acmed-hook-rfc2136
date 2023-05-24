@@ -1,0 +1,4 @@
+[package]
+name = "acmed-hook-rfc2136"
+version = "0.1.0"
+edition = "2021"
