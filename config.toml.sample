@@ -1,6 +1,6 @@
 resolver = "1.1.1.1:53"
 
-[zones."acme.example.org"]
+[zones."acme.example.org."] # trailing dot is important
 primary_ns = "1.2.3.4:53"
 tsig_name = "my-tsig-name"
 tsig_key = "" #base64 encoded key, standard alphabet, padded
