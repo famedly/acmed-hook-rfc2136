@@ -27,11 +27,13 @@
             clippy
             rust-analyzer
             perf-tools
-            linuxPackages_latest.perf
           ];
 
           shellHook = ''
           '';
+        };
+        packages = {
+          acmed-hook-rfc2136 = import ./package.nix;
         };
       }
     );
