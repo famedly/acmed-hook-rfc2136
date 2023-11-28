@@ -13,7 +13,7 @@ time = "0.3.21"
 toml = "0.7.3"
 hickory-client = { version = "0.24.0", features = ["dnssec", "dnssec-openssl"] }
 hickory-proto = { version = "0.24.0", features = ["dnssec-openssl"] }
-openssl = { version = "0.10.59", features = ["vendored"] }
+openssl = { version = "0.10.59", features = [ ] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 once_cell = "1.18"
