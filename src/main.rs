@@ -88,29 +88,29 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn find_record(identifier: &Name) -> anyhow::Result<Name> {
-    let last_record = search(
-        Name::from_str("_acme-challenge")?.append_name(identifier)?,
-        RecordType::TXT,
-    )?
-    .answers()
-    .last()
-    .context("no record in response")?
-    .clone()
-    .into_parts();
-
-    match last_record
-        .rdata
-        .context("record contains no answer section")?
+    let validation_domain_name = Name::from_str("_acme-challenge")?.append_name(identifier)?;
+    match search(&validation_domain_name, RecordType::TXT)?
+        .answers()
+        .last()
     {
-        RData::CNAME(name) => Ok(name.0),
-        RData::TXT(_) => {
-            info!(
-                "found existing TXT record for {:?}",
-                last_record.name_labels
-            );
-            Ok(last_record.name_labels)
+        Some(record) => {
+            let last_record = record.clone().into_parts();
+            match last_record
+                .rdata
+                .context("record contains no answer section")?
+            {
+                RData::CNAME(name) => Ok(name.0),
+                RData::TXT(_) => {
+                    info!(
+                        "found existing TXT record for {:?}",
+                        last_record.name_labels
+                    );
+                    Ok(last_record.name_labels)
+                }
+                _ => anyhow::bail!("unexpected record type"),
+            }
         }
-        _ => anyhow::bail!("unexpected record type"),
+        None => Ok(validation_domain_name),
     }
 }
 
@@ -118,7 +118,7 @@ fn find_zone(identifier: &Name) -> anyhow::Result<Name> {
     // Querries the SOA Record for the challenge idendifier.
     // This is based on the assumtion, it will always return a SOA Record.
     // I am unsure if this assumtion is correct.
-    let response = search(identifier.clone(), RecordType::SOA)?;
+    let response = search(identifier, RecordType::SOA)?;
     match response.response_code() {
         ResponseCode::NXDomain | ResponseCode::NoError => response
             .name_servers()
@@ -130,7 +130,7 @@ fn find_zone(identifier: &Name) -> anyhow::Result<Name> {
     }
 }
 
-pub fn search(identifier: Name, rtype: RecordType) -> anyhow::Result<DnsResponse> {
+pub fn search(identifier: &Name, rtype: RecordType) -> anyhow::Result<DnsResponse> {
     let client = SyncClient::new(
         UdpClientConnection::new(
             *RESOLVER
@@ -140,7 +140,7 @@ pub fn search(identifier: Name, rtype: RecordType) -> anyhow::Result<DnsResponse
         .context("failed to connect to recursor")?,
     );
 
-    Ok(retry_op(client.query(&identifier, DNSClass::IN, rtype))?)
+    Ok(retry_op(client.query(identifier, DNSClass::IN, rtype))?)
 }
 
 #[instrument]
