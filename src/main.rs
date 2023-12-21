@@ -88,29 +88,29 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn find_record(identifier: &Name) -> anyhow::Result<Name> {
-    let last_record = search(
-        Name::from_str("_acme-challenge")?.append_name(identifier)?,
-        RecordType::TXT,
-    )?
-    .answers()
-    .last()
-    .context("no record in response")?
-    .clone()
-    .into_parts();
-
-    match last_record
-        .rdata
-        .context("record contains no answer section")?
+    let validation_domain_name = Name::from_str("_acme-challenge")?.append_name(identifier)?;
+    match search(validation_domain_name, RecordType::TXT)?
+        .answers()
+        .last()
     {
-        RData::CNAME(name) => Ok(name.0),
-        RData::TXT(_) => {
-            info!(
-                "found existing TXT record for {:?}",
-                last_record.name_labels
-            );
-            Ok(last_record.name_labels)
+        Some(record) => {
+            let last_record = record.clone().into_parts();
+            match last_record
+                .rdata
+                .context("record contains no answer section")?
+            {
+                RData::CNAME(name) => Ok(name.0),
+                RData::TXT(_) => {
+                    info!(
+                        "found existing TXT record for {:?}",
+                        last_record.name_labels
+                    );
+                    Ok(last_record.name_labels)
+                }
+                _ => anyhow::bail!("unexpected record type"),
+            }
         }
-        _ => anyhow::bail!("unexpected record type"),
+        None => Ok(validation_domain_name),
     }
 }
 
