@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    uses: famedly/github-workflows/.github/workflows/rust.yml@main
+    uses: famedly/github-workflows/.github/workflows/rust.yml@57b383862ba81dfa265bb33d492e2bbcbc96891d
     secrets: inherit
     with:
       extra_build_dependencies: |
